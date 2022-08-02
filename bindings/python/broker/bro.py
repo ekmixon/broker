@@ -16,10 +16,11 @@ class Event(zeek.Event):
         usage_text = stack_info[3]
 
         if (usage_file, usage_line) not in Event.warnings_emitted:
-            print('File "{}", line {}: deprecated bro.event usage,'
-                  ' use zeek.Event instead:\n    {}'.format(
-                      usage_file, usage_line, usage_text),
-                  file=sys.stderr)
+            print(
+                f'File "{usage_file}", line {usage_line}: deprecated bro.event usage, use zeek.Event instead:\n    {usage_text}',
+                file=sys.stderr,
+            )
+
 
             Event.warnings_emitted.add((usage_file, usage_line))
 

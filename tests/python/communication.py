@@ -10,10 +10,7 @@ import broker
 class TestCommunication(unittest.TestCase):
     def test_ping(self):
         # --peer-start
-        with broker.Endpoint() as ep1, \
-             broker.Endpoint() as ep2, \
-             ep1.make_subscriber("/test") as s1, \
-             ep2.make_subscriber("/test") as s2:
+        with broker.Endpoint() as ep1, broker.Endpoint() as ep2, ep1.make_subscriber("/test") as s1, ep2.make_subscriber("/test") as s2:
 
             port = ep1.listen("127.0.0.1", 0)
             ep2.peer("127.0.0.1", port, 1.0)
@@ -31,10 +28,7 @@ class TestCommunication(unittest.TestCase):
             ep1.publish(t, ["pong"])
 
             while True:
-                # This loop exists just for sake of test coverage for "poll()"
-                msgs = s2.poll()
-
-                if msgs:
+                if msgs := s2.poll():
                     self.assertEqual(len(msgs), 1)
                     (t, d) = msgs[0]
                     break;
@@ -46,8 +40,8 @@ class TestCommunication(unittest.TestCase):
 
     def test_messages(self):
         with broker.Endpoint() as ep1, \
-             broker.Endpoint() as ep2, \
-             ep1.make_subscriber("/test") as s1:
+                 broker.Endpoint() as ep2, \
+                 ep1.make_subscriber("/test") as s1:
 
             port = ep1.listen("127.0.0.1", 0)
             ep2.peer("127.0.0.1", port, 1.0)
@@ -76,14 +70,12 @@ class TestCommunication(unittest.TestCase):
             self.assertEqual(len(dict_data), 3)
 
     def test_immutable_messages(self):
-        with broker.Endpoint() as ep1, \
-             broker.Endpoint() as ep2, \
-             ep1.make_safe_subscriber("/test") as s1:
+        with broker.Endpoint() as ep1, broker.Endpoint() as ep2, ep1.make_safe_subscriber("/test") as s1:
 
             port = ep1.listen("127.0.0.1", 0)
             ep2.peer("127.0.0.1", port, 1.0)
 
-            msg = ("/test/1", ({"a": "A"}, set([1,2,3]), ('a', 'b', 'c')))
+            msg = "/test/1", ({"a": "A"}, {1, 2, 3}, ('a', 'b', 'c'))
             ep2.publish(*msg)
 
             topic, (dict_data, set_data, tuple_data) = s1.get()

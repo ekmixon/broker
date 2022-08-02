@@ -37,7 +37,7 @@ master_doc = 'index'
 # General information about the project.
 project = u'Broker'
 author = u'The Zeek Project'
-copyright = str(date.today().year) + ', ' + author
+copyright = f'{str(date.today().year)}, {author}'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

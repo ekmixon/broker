@@ -56,10 +56,12 @@ class TestDataConstruction(unittest.TestCase):
                 self.assertEqual(b2p.minute, p.minute)
                 self.assertEqual(b2p.second, p.second)
 
-                us_equal = (b2p.microsecond == p.microsecond or
-                            b2p.microsecond == p.microsecond - 1 or
-                            b2p.microsecond == p.microsecond + 1)
-                self.assertTrue(us_equal)
+                us_equal = b2p.microsecond in [
+                    p.microsecond,
+                    p.microsecond - 1,
+                    p.microsecond + 1,
+                ]
+
             else:
                 # 'b2p' is in UTC and 'p' is assumed to be local time
                 self.assertEqual(b2p.tzinfo, broker.utc)
@@ -75,11 +77,8 @@ class TestDataConstruction(unittest.TestCase):
 
                 self.assertEqual(b2p_ts, p_ts)
 
-                us_equal = (b2p_us == p_us or
-                            b2p_us == p_us - 1 or
-                            b2p_us == p_us + 1)
-                self.assertTrue(us_equal)
-
+                us_equal = b2p_us in [p_us, p_us - 1, p_us + 1]
+            self.assertTrue(us_equal)
         else:
             self.assertEqual(b2p, p)
 

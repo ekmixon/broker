@@ -29,10 +29,15 @@ def printStats(stats):
     last_t = now
     last_sent_ev1 = total_sent_ev1
 
-    print("{} dt={} ev{}={} (total {} of {}) {}".format(t, dt, event, ev1, total_recv_ev1, total_sent_ev1, rate))
+    print(
+        f"{t} dt={dt} ev{event}={ev1} (total {total_recv_ev1} of {total_sent_ev1}) {rate}"
+    )
 
 def sendBatch(p, num):
-    event_1s = [broker.zeek.Event("event_{}".format(event), [i, "test"]) for i in range(num)]
+    event_1s = [
+        broker.zeek.Event(f"event_{event}", [i, "test"]) for i in range(num)
+    ]
+
     for e in event_1s:
         p.publish(e)
 
@@ -63,7 +68,7 @@ ep.peer("127.0.0.1", 9999)
 # Wait until connection is established.
 st = ss.get()
 
-if not (type(st) == broker.Status and st.code() == broker.SC.PeerAdded):
+if type(st) != broker.Status or st.code() != broker.SC.PeerAdded:
     print("could not connect")
     sys.exit(1)
 

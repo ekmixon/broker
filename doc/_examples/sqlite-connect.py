@@ -4,15 +4,13 @@ import broker
 import sys
 import time
 
-with broker.Endpoint() as ep, \
-     ep.make_subscriber('/test') as s, \
-     ep.make_status_subscriber(True) as ss:
+with broker.Endpoint() as ep, ep.make_subscriber('/test') as s, ep.make_status_subscriber(True) as ss:
 
     ep.peer('127.0.0.1', 9999, 1.0)
 
     st = ss.get();
 
-    if not (type(st) == broker.Status and st.code() == broker.SC.PeerAdded):
+    if type(st) != broker.Status or st.code() != broker.SC.PeerAdded:
         print('could not connect')
         sys.exit(1)
 

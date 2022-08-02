@@ -76,8 +76,7 @@ def RunZeek(script, port):
 
 class TestCommunication(unittest.TestCase):
     def test_ping(self):
-        with broker.Endpoint() as ep, \
-             ep.make_subscriber("/test") as sub:
+        with broker.Endpoint() as ep, ep.make_subscriber("/test") as sub:
 
             port = ep.listen("127.0.0.1", 0)
 
@@ -85,7 +84,7 @@ class TestCommunication(unittest.TestCase):
             p.daemon = True
             p.start()
 
-            for i in range(0, 6):
+            for i in range(6):
                 (t, msg) = sub.get()
                 ev = broker.zeek.Event(msg)
                 (s, c) = ev.args()
@@ -99,7 +98,7 @@ class TestCommunication(unittest.TestCase):
                 self.assertEqual(c, i)
 
                 if i < 3:
-                    ev = broker.zeek.Event("pong", s + "X", c)
+                    ev = broker.zeek.Event("pong", f"{s}X", c)
                 elif i < 5:
                     ev = broker.zeek.Event("pong", s.encode('utf-8') + b'X', c)
                 else:

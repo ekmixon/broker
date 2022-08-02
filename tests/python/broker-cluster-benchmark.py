@@ -25,7 +25,7 @@ class Environment:
 
     def prepare_environment(self):
         os.makedirs(self.input_dir)
-        file_name = test_recording + '.zip'
+        file_name = f'{test_recording}.zip'
         file_path = os.path.join(self.test_dir, 'integration', file_name)
         with zipfile.ZipFile(file_path, 'r') as zip_ref:
             zip_ref.extractall(self.input_dir)
@@ -45,7 +45,7 @@ def test_config_generation(exe, recording_dir, expected):
     with subprocess.Popen(cmd, stdout=PIPE, stderr=PIPE, close_fds=True, universal_newlines=True) as proc:
         output, errors = proc.communicate()
         if proc.returncode != 0:
-            raise RuntimeError('failed to generate config: ' + errors)
+            raise RuntimeError(f'failed to generate config: {errors}')
         if output != expected:
             sys.stderr.write('*** ERROR: generate-config procuded wrong result\n')
             sys.stderr.write('\n*** EXPECTED:\n')
@@ -64,7 +64,7 @@ def run_benchmark(exe, config):
         proc.stdin = None
         output, errors = proc.communicate()
         if proc.returncode != 0:
-            raise RuntimeError('failed to run the benchmark: ' + errors)
+            raise RuntimeError(f'failed to run the benchmark: {errors}')
         print('run_benchmark: pass')
         sys.stdout.write('*** Benchmark output:\n')
         sys.stdout.write(output)

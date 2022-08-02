@@ -35,11 +35,7 @@ except:
                 if self.utcoffset(None) != other.utcoffset(None):
                     return False
 
-                if other.dst(None) is None:
-                    return True
-
-                return self.dst(None) == other.dst(None)
-
+                return True if other.dst(None) is None else self.dst(None) == other.dst(None)
             except:
                 return False
 
@@ -73,10 +69,7 @@ BrokerOptions = _broker.BrokerOptions
 # for comparision against the enum.
 _EC_eq = _broker.EC.__eq__
 def _our_EC_eq(self, other):
-    if isinstance(other, int):
-        return other == int(self)
-    else:
-        return _EC_eq(self, other)
+    return other == int(self) if isinstance(other, int) else _EC_eq(self, other)
 
 _broker.EC.__eq__ = _our_EC_eq
 
@@ -92,18 +85,15 @@ Timestamp = _broker.Timestamp
 Vector = _broker.Vector
 
 def _make_topic(t):
-    return (Topic(t) if not isinstance(t, Topic) else t)
+    return t if isinstance(t, Topic) else Topic(t)
 
 def _make_topics(ts):
     if isinstance(ts, Topic):
         ts = [ts]
-    elif isinstance(ts, str):
+    elif isinstance(ts, str) or not isinstance(ts, collections.Iterable):
         ts = [Topic(ts)]
-    elif isinstance(ts, collections.Iterable):
-        ts = [_make_topic(t) for t in ts]
     else:
-        ts = [Topic(ts)]
-
+        ts = [_make_topic(t) for t in ts]
     return _broker.VectorTopic(ts)
 
 # This class does not derive from the internal class because we
@@ -462,7 +452,7 @@ class Endpoint(_broker.Endpoint):
 
 class Message:
     def to_broker(self):
-        assert False and "method not overridden"
+        assert False
 
 from . import zeek
 from . import bro
@@ -507,15 +497,15 @@ class Data(_broker.Data):
             length = x.prefixlen
             _broker.Data.__init__(self, _broker.Subnet(address, length))
 
-        elif isinstance(x, list) or isinstance(x, tuple):
+        elif isinstance(x, (list, tuple)):
             v = _broker.Vector([Data(i) for i in x])
             _broker.Data.__init__(self, v)
 
-        elif isinstance(x, set) or isinstance(x, frozenset):
+        elif isinstance(x, (set, frozenset)):
             s = _broker.Set(([Data(i) for i in x]))
             _broker.Data.__init__(self, s)
 
-        elif isinstance(x, dict) or isinstance(x, types.MappingProxyType):
+        elif isinstance(x, (dict, types.MappingProxyType)):
             t = _broker.Table()
             for (k, v) in x.items():
                 t[Data(k)] = Data(v)
@@ -523,7 +513,7 @@ class Data(_broker.Data):
             _broker.Data.__init__(self, t)
 
         else:
-            raise TypeError("unsupported data type: " + str(type(x)))
+            raise TypeError(f"unsupported data type: {str(type(x))}")
 
     @staticmethod
     def from_py(x):
@@ -546,7 +536,7 @@ class Data(_broker.Data):
                 return ipaddress.IPv6Network(to_ipaddress(s.network())).supernet(new_prefix=s.length())
 
         def to_set(s):
-            return set([Data.to_py(i) for i in s])
+            return {Data.to_py(i) for i in s}
 
         def to_table(t):
             return {Data.to_py(k): Data.to_py(v) for (k, v) in t.items()}
@@ -581,7 +571,7 @@ class Data(_broker.Data):
         try:
             return converters[d.get_type()]()
         except KeyError:
-            raise TypeError("unsupported data type: " + str(d.get_type()))
+            raise TypeError(f"unsupported data type: {str(d.get_type())}")
 
 class ImmutableData(Data):
     """A Data specialization that uses immutable complex types for returned Python
@@ -596,7 +586,7 @@ class ImmutableData(Data):
     @staticmethod
     def to_py(d):
         def to_set(s):
-            return frozenset([ImmutableData.to_py(i) for i in s])
+            return frozenset(ImmutableData.to_py(i) for i in s)
 
         def to_table(t):
             tmp = {ImmutableData.to_py(k): ImmutableData.to_py(v) for (k, v) in t.items()}
